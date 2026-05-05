@@ -1,0 +1,26 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Spring Boot
+*.log
+logs/
+
+# Environment secrets — NEVER commit
+.env
+*.env
+
+# Docker volumes
+docker/volumes/
+
+# OS
+.DS_Store
+Thumbs.db

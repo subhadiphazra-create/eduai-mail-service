@@ -1,0 +1,121 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EduAI Mail Service — Docker Compose
+#
+# Services:
+#   mail-service  — Spring Boot app (port 8082)
+#   redis         — Local Redis (replace with Upstash in prod)
+#   mailhog       — SMTP catcher for dev (port 8025 web UI)
+#   postgres      — PostgreSQL for persistence
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Mail Service ─────────────────────────────────────────────────────────
+  mail-service:
+    build:
+      context: .
+      dockerfile: mailservice-server/Dockerfile
+    container_name: eduai-mail-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE:   dev
+      # Database
+      DATABASE_URL:             jdbc:postgresql://postgres:5432/mailservicedb
+      DATABASE_USERNAME:        mailuser
+      DATABASE_PASSWORD:        mailpass
+      # Redis (local Docker — switch to Upstash vars for prod)
+      REDIS_HOST:               redis
+      REDIS_PORT:               6379
+      REDIS_PASSWORD:           ""
+      # SMTP (MailHog for dev)
+      SMTP_HOST:                mailhog
+      SMTP_PORT:                1025
+      SMTP_ENABLED:             "true"
+      SMTP_FROM_EMAIL:          noreply@eduai-dev.com
+      SMTP_FROM_NAME:           "EduAI Dev"
+      # Resend (optional — set RESEND_ENABLED=true + RESEND_API_KEY to activate)
+      RESEND_ENABLED:           "false"
+      RESEND_API_KEY:           ""
+      RESEND_FROM_EMAIL:        ""
+      # SendGrid (optional)
+      SENDGRID_ENABLED:         "false"
+      SENDGRID_API_KEY:         ""
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mailnet
+
+  # ── Redis (local dev) ─────────────────────────────────────────────────────
+  # For production: set REDIS_HOST, REDIS_PORT, REDIS_PASSWORD to Upstash values
+  # and enable ssl.enabled=true in application-prod.yml
+  redis:
+    image: redis:7.2-alpine
+    container_name: eduai-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - mailnet
+
+  # ── PostgreSQL ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: eduai-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB:       mailservicedb
+      POSTGRES_USER:     mailuser
+      POSTGRES_PASSWORD: mailpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mailuser -d mailservicedb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - mailnet
+
+  # ── MailHog (dev SMTP catcher) ────────────────────────────────────────────
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: eduai-mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI — open http://localhost:8025 to inspect emails
+    restart: unless-stopped
+    networks:
+      - mailnet
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  mailnet:
+    driver: bridge

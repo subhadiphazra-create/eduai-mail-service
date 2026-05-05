@@ -1,0 +1,108 @@
+spring:
+  application:
+    name: eduai-mail-service
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:prod}
+
+  # ── JPA ─────────────────────────────────────────────────────────────────
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  # ── Jackson ─────────────────────────────────────────────────────────────
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+
+  # ── Thymeleaf (disabled for web - only used for email templates) ─────────
+  thymeleaf:
+    check-template-location: true
+    enabled: false   # We configure our own engine in TemplateConfig
+
+# ── Server ───────────────────────────────────────────────────────────────────
+server:
+  port: 8082
+  shutdown: graceful
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    connection-timeout: 20s
+
+# ── Actuator ─────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# ── Mail Service Custom Config ────────────────────────────────────────────────
+mail:
+  # Default sender identity
+  default:
+    from-email: ${MAIL_DEFAULT_FROM_EMAIL:noreply@eduai.com}
+    from-name:  ${MAIL_DEFAULT_FROM_NAME:EduAI}
+    reply-to:   ${MAIL_DEFAULT_REPLY_TO:support@eduai.com}
+
+  # Async thread pool
+  async:
+    core-pool-size:  ${MAIL_ASYNC_CORE_POOL:5}
+    max-pool-size:   ${MAIL_ASYNC_MAX_POOL:20}
+    queue-capacity:  ${MAIL_ASYNC_QUEUE_CAPACITY:500}
+
+  # Scheduler
+  scheduler:
+    poll-rate-ms: ${MAIL_SCHEDULER_POLL_RATE:60000}
+
+  # Retry
+  retry:
+    max-attempts:     ${MAIL_RETRY_MAX_ATTEMPTS:3}
+    initial-delay-ms: ${MAIL_RETRY_INITIAL_DELAY:5000}
+    multiplier:       ${MAIL_RETRY_MULTIPLIER:2.0}
+
+  # OTP
+  otp:
+    default-length:      ${MAIL_OTP_LENGTH:6}
+    default-expiry-mins: ${MAIL_OTP_EXPIRY_MINS:10}
+    rate-limit-per-hour: ${MAIL_OTP_RATE_LIMIT:5}
+
+  # Email providers
+  providers:
+    smtp:
+      enabled:     ${SMTP_ENABLED:true}
+      from-email:  ${SMTP_FROM_EMAIL:noreply@eduai.com}
+      from-name:   ${SMTP_FROM_NAME:EduAI}
+
+    resend:
+      enabled:     ${RESEND_ENABLED:false}
+      api-key:     ${RESEND_API_KEY:}
+      from-email:  ${RESEND_FROM_EMAIL:noreply@eduai.com}
+      from-name:   ${RESEND_FROM_NAME:EduAI}
+
+    sendgrid:
+      enabled:     ${SENDGRID_ENABLED:false}
+      api-key:     ${SENDGRID_API_KEY:}
+      from-email:  ${SENDGRID_FROM_EMAIL:noreply@eduai.com}
+      from-name:   ${SENDGRID_FROM_NAME:EduAI}

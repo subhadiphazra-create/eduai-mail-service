@@ -1,0 +1,85 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# DEV profile — local Docker Redis + H2 in-memory database + MailHog SMTP
+# ─────────────────────────────────────────────────────────────────────────────
+spring:
+
+  # ── Postgres DB ──────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://localhost:5432/eduai_mail_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 20
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Kolkata
+
+  # ── Redis (Local Docker) ──────────────────────────────────────────────────
+  data:
+    redis:
+      host:     ${REDIS_HOST:localhost}
+      port:     ${REDIS_PORT:6379}
+#      password: ${REDIS_PASSWORD:}
+      ssl:
+        enabled: false
+      timeout:  5000
+
+  # ── SMTP (MailHog for local dev) ──────────────────────────────────────────
+  mail:
+    host:     ${SMTP_HOST:localhost}
+    port:     ${SMTP_PORT:1025}
+#    username: ${SMTP_USERNAME:}
+#    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth:            false
+          starttls:
+            enable:        false
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  level:
+    com.eduai.mailservice: DEBUG
+    org.springframework.mail: DEBUG
+    org.springframework.data.redis: WARN
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# ── Mail providers (dev — use SMTP/MailHog only) ──────────────────────────────
+mail:
+  providers:
+    smtp:
+      enabled:    true
+      from-email: noreply@eduai-dev.com
+      from-name:  EduAI Dev
+    resend:
+      enabled:    false
+    sendgrid:
+      enabled:    false
+
+  async:
+    core-pool-size: 2
+    max-pool-size:  5
+    queue-capacity: 100
+
+  scheduler:
+    poll-rate-ms: 30000   # 30s in dev for faster feedback
+
+# ── Actuator ─────────────────────────────────────────────────────────────────
+management:
+  endpoint:
+    health:
+      show-details: always

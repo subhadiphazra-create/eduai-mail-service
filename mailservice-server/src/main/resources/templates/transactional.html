@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transaction Confirmation</title>
+  <style>
+    body { margin:0; padding:0; font-family:'Segoe UI',Arial,sans-serif; background:#f4f6fb; }
+    .wrapper { width:100%; background:#f4f6fb; padding:40px 0; }
+    .container { max-width:540px; margin:0 auto; background:#fff; border-radius:12px;
+                 box-shadow:0 2px 16px rgba(0,0,0,0.08); overflow:hidden; }
+    .header { background:linear-gradient(135deg,#111827,#374151); padding:32px 40px; text-align:center; }
+    .header h1 { margin:0; color:#fff; font-size:22px; font-weight:700; }
+    .header p  { margin:6px 0 0; color:#9ca3af; font-size:13px; }
+    .body  { padding:36px 40px; }
+    .text  { font-size:15px; color:#374151; line-height:1.8; margin:0 0 16px; }
+    .details-table { width:100%; border-collapse:collapse; margin:20px 0; }
+    .details-table th { background:#f9fafb; padding:10px 14px; text-align:left;
+                        font-size:12px; color:#6b7280; text-transform:uppercase;
+                        letter-spacing:0.5px; border-bottom:2px solid #e5e7eb; }
+    .details-table td { padding:12px 14px; font-size:14px; color:#111827;
+                        border-bottom:1px solid #f3f4f6; }
+    .details-table tr:last-child td { border-bottom:none; }
+    .status-badge { display:inline-block; padding:3px 10px; border-radius:20px;
+                    font-size:12px; font-weight:600; }
+    .status-success { background:#d1fae5; color:#065f46; }
+    .footer { padding:20px 40px; background:#f9fafb; text-align:center; }
+    .footer p { font-size:12px; color:#9ca3af; margin:4px 0; }
+    .footer a { color:#6366f1; text-decoration:none; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="container">
+    <div class="header">
+      <h1>Transaction Confirmation</h1>
+      <p th:text="${appName ?: 'EduAI'}">EduAI</p>
+    </div>
+    <div class="body">
+      <p class="text">Hi <strong th:text="${toName ?: 'there'}">there</strong>,</p>
+      <p class="text" th:text="${transactionMessage ?: 'Your transaction has been processed successfully.'}">
+        Your transaction has been processed successfully.
+      </p>
+      <table class="details-table" th:if="${transactionDetails}">
+        <thead>
+          <tr><th>Field</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="entry : ${transactionDetails}">
+            <td th:text="${entry.key}">Field</td>
+            <td th:text="${entry.value}">Value</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="text" style="font-size:13px; color:#9ca3af;">
+        Reference ID: <strong th:text="${referenceId ?: 'N/A'}">N/A</strong>
+      </p>
+    </div>
+    <div class="footer">
+      <p>© <span th:text="${year ?: 2025}">2025</span> <span th:text="${appName ?: 'EduAI'}">EduAI</span></p>
+      <p th:if="${supportEmail}">
+        <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support@eduai.com</a>
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

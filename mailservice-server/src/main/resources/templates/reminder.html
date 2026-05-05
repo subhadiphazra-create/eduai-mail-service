@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reminder</title>
+  <style>
+    body { margin:0; padding:0; font-family:'Segoe UI',Arial,sans-serif; background:#f4f6fb; }
+    .wrapper { width:100%; background:#f4f6fb; padding:40px 0; }
+    .container { max-width:540px; margin:0 auto; background:#ffffff; border-radius:12px;
+                 box-shadow:0 2px 16px rgba(0,0,0,0.08); overflow:hidden; }
+    .header { background:linear-gradient(135deg,#f59e0b,#d97706); padding:36px 40px; text-align:center; }
+    .header h1 { margin:0; color:#ffffff; font-size:24px; font-weight:700; }
+    .header p  { margin:6px 0 0; color:rgba(255,255,255,0.9); font-size:14px; }
+    .body  { padding:40px; }
+    .bell  { font-size:48px; text-align:center; margin:0 0 20px; }
+    .text  { font-size:15px; color:#374151; line-height:1.8; margin:0 0 16px; }
+    .reminder-box { background:#fffbeb; border:1px solid #fde68a; border-radius:10px;
+                    padding:24px; margin:24px 0; }
+    .reminder-box h3 { margin:0 0 8px; color:#92400e; font-size:16px; }
+    .reminder-box p  { margin:0; color:#78350f; font-size:14px; line-height:1.6; }
+    .deadline { display:inline-block; background:#dc2626; color:#fff; font-size:13px;
+                font-weight:700; padding:4px 12px; border-radius:20px; margin-top:12px; }
+    .cta-wrap { text-align:center; margin:32px 0; }
+    .cta-btn  { display:inline-block; background:#f59e0b; color:#ffffff; text-decoration:none;
+                font-size:15px; font-weight:700; padding:13px 34px; border-radius:8px; }
+    .footer   { padding:24px 40px; background:#f9fafb; text-align:center; }
+    .footer p { font-size:12px; color:#9ca3af; margin:4px 0; }
+    .footer a { color:#f59e0b; text-decoration:none; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="container">
+
+    <div class="header">
+      <h1>⏰ Reminder</h1>
+      <p th:text="${appName ?: 'EduAI'}">EduAI</p>
+    </div>
+
+    <div class="body">
+      <div class="bell">🔔</div>
+
+      <p class="text">
+        Hi <strong th:text="${toName ?: 'there'}">there</strong>,
+      </p>
+      <p class="text" th:text="${reminderMessage ?: 'This is a friendly reminder about an upcoming item.'}">
+        This is a friendly reminder about an upcoming item.
+      </p>
+
+      <div class="reminder-box">
+        <h3 th:text="${reminderTitle ?: 'Action Required'}">Action Required</h3>
+        <p  th:text="${reminderDetails ?: 'Please complete the required action before the deadline.'}">
+          Please complete the required action before the deadline.
+        </p>
+        <span th:if="${deadline}" class="deadline">
+          📅 Deadline: <span th:text="${deadline}">Tomorrow</span>
+        </span>
+      </div>
+
+      <div th:if="${actionUrl}" class="cta-wrap">
+        <a th:href="${actionUrl}" class="cta-btn"
+           th:text="${actionLabel ?: 'Take Action Now'}">Take Action Now</a>
+      </div>
+
+      <p class="text" style="font-size:13px; color:#9ca3af;">
+        If you've already completed this, please disregard this reminder.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>© <span th:text="${year ?: 2025}">2025</span>
+         <span th:text="${appName ?: 'EduAI'}">EduAI</span>. All rights reserved.</p>
+      <p th:if="${supportEmail}">
+        Questions? <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support@eduai.com</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

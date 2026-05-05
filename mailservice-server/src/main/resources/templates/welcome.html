@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to EduAI</title>
+  <style>
+    body { margin:0; padding:0; font-family:'Segoe UI',Arial,sans-serif; background:#f4f6fb; }
+    .wrapper { width:100%; background:#f4f6fb; padding:40px 0; }
+    .container { max-width:560px; margin:0 auto; background:#ffffff; border-radius:12px;
+                 box-shadow:0 2px 16px rgba(0,0,0,0.08); overflow:hidden; }
+    .hero { background:linear-gradient(135deg,#10b981,#059669); padding:52px 40px; text-align:center; }
+    .hero h1 { margin:0 0 10px; color:#ffffff; font-size:30px; font-weight:800; }
+    .hero p  { margin:0; color:rgba(255,255,255,0.9); font-size:16px; }
+    .body { padding:40px; }
+    .greeting { font-size:17px; color:#111827; font-weight:600; margin:0 0 16px; }
+    .text     { font-size:15px; color:#4b5563; line-height:1.8; margin:0 0 20px; }
+    .features { list-style:none; padding:0; margin:24px 0; }
+    .features li { display:flex; align-items:flex-start; gap:12px; margin-bottom:16px;
+                   font-size:14px; color:#374151; }
+    .feature-icon { width:32px; height:32px; border-radius:8px; background:#d1fae5;
+                    display:flex; align-items:center; justify-content:center;
+                    font-size:16px; flex-shrink:0; }
+    .cta-wrap { text-align:center; margin:32px 0; }
+    .cta-btn  { display:inline-block; background:#10b981; color:#ffffff; text-decoration:none;
+                font-size:15px; font-weight:700; padding:14px 36px; border-radius:8px;
+                letter-spacing:0.3px; }
+    .divider { border:none; border-top:1px solid #e5e7eb; margin:32px 0; }
+    .footer   { padding:24px 40px; background:#f9fafb; text-align:center; }
+    .footer p { font-size:12px; color:#9ca3af; margin:4px 0; line-height:1.6; }
+    .footer a { color:#10b981; text-decoration:none; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="container">
+
+    <div class="hero">
+      <h1>Welcome to <span th:text="${appName ?: 'EduAI'}">EduAI</span>! 🎉</h1>
+      <p>Your learning journey starts here</p>
+    </div>
+
+    <div class="body">
+      <p class="greeting">Hi <span th:text="${toName ?: 'there'}">there</span>,</p>
+
+      <p class="text">
+        We're thrilled to have you on board. Your account has been created and you're
+        all set to start exploring everything
+        <strong th:text="${appName ?: 'EduAI'}">EduAI</strong> has to offer.
+      </p>
+
+      <ul class="features">
+        <li>
+          <span class="feature-icon">📚</span>
+          <div><strong>Personalized Learning</strong><br/>
+            AI-powered courses tailored to your pace and goals.</div>
+        </li>
+        <li>
+          <span class="feature-icon">🤖</span>
+          <div><strong>Smart Assistance</strong><br/>
+            Get instant help from our AI tutor, anytime.</div>
+        </li>
+        <li>
+          <span class="feature-icon">📈</span>
+          <div><strong>Progress Tracking</strong><br/>
+            Visualize your growth with detailed analytics.</div>
+        </li>
+      </ul>
+
+      <div th:if="${dashboardUrl}" class="cta-wrap">
+        <a th:href="${dashboardUrl}" class="cta-btn">Go to Dashboard →</a>
+      </div>
+
+      <hr class="divider"/>
+
+      <p class="text" style="font-size:13px; color:#9ca3af;">
+        If you have any questions, reply to this email or reach out to
+        <a th:if="${supportEmail}" th:href="'mailto:' + ${supportEmail}"
+           th:text="${supportEmail}" style="color:#10b981;">support@eduai.com</a>.
+      </p>
+    </div>
+
+    <div class="footer">
+      <p>© <span th:text="${year ?: 2025}">2025</span>
+         <span th:text="${appName ?: 'EduAI'}">EduAI</span>. All rights reserved.</p>
+      <p>You received this because you created an account.</p>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
