@@ -48,8 +48,13 @@ public class OtpServiceImpl implements OtpService {
                 ? request.getOtp()
                 : otpGenerator.generate(request.getOtpLength());
 
-        // Store OTP in Redis for verification (caller's responsibility to verify)
+        // Store OTP in Redis for verification
         String otpKey = Constants.CACHE_OTP_PREFIX + email;
+
+        // Delete any existing OTP for this email first
+        redisTemplate.delete(otpKey);
+
+        // Store new OTP
         redisTemplate.opsForValue().set(otpKey, otp, Duration.ofMinutes(request.getExpiryMinutes()));
 
         // Build email request
@@ -63,7 +68,7 @@ public class OtpServiceImpl implements OtpService {
                 .subject("Your OTP" + (request.getPurpose() != null ? " for " + request.getPurpose() : ""))
                 .emailType(EmailType.OTP)
                 .templateVariables(vars)
-                .retryEnabled(false)    // OTPs should not be silently retried
+                .retryEnabled(false)
                 .maxRetries(1)
                 .correlationId(correlationId)
                 .appId(request.getAppId())
@@ -78,10 +83,11 @@ public class OtpServiceImpl implements OtpService {
             return OtpResponseDto.success(response.getMessageId(), email,
                     request.getExpiryMinutes(), correlationId);
         } catch (Exception ex) {
+            // Clean up Redis key if email sending fails
+            redisTemplate.delete(otpKey);
             throw OtpException.sendFailed(email, ex);
         }
     }
-
     // ── Private helpers ──────────────────────────────────────────────────────
 
     private void enforceRateLimit(String email) {

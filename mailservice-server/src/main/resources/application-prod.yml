@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# PROD profile — PostgreSQL + Upstash Redis (TLS) + real SMTP/Resend/SendGrid
+# PROD profile — PostgreSQL + Upstash Redis (TLS) + Resend
 # All secrets via environment variables — NEVER hardcode in this file
 # ─────────────────────────────────────────────────────────────────────────────
 spring:
@@ -18,72 +18,73 @@ spring:
       max-lifetime:         1800000
       pool-name:            MailHikariPool
       auto-commit:          false
+      data-source-properties:
+        prepareThreshold:               0
+        preparedStatementCacheQueries:  0
 
   jpa:
     hibernate:
-      ddl-auto: validate        # use Flyway / Liquibase in production
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
-        format_sql:             false
+        format_sql:          false
         jdbc:
-          batch_size:           50
-        generate_statistics:    false
+          batch_size:        50
+        generate_statistics: false
 
   # ── Upstash Redis (TLS) ─────────────────────────────────────────────────
   data:
     redis:
       host:     ${REDIS_HOST}
-      port:     ${REDIS_PORT:6380}
+      port:     ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD}
       ssl:
         enabled: true
       timeout:  5000
 
-  # ── SMTP (Production) ──────────────────────────────────────────────────
+  # ── SMTP disabled on Render (ports blocked) ────────────────────────────
   mail:
-    host:     ${SMTP_HOST}
-    port:     ${SMTP_PORT:587}
-    username: ${SMTP_USERNAME}
-    password: ${SMTP_PASSWORD}
+    host:     smtp.gmail.com
+    port:     587
+    username: ${SMTP_USERNAME:disabled}
+    password: ${SMTP_PASSWORD:disabled}
     properties:
       mail:
         smtp:
-          auth:                true
+          auth:              true
           starttls:
-            enable:            true
-            required:          true
-          connectiontimeout:   5000
-          timeout:             10000
-          writetimeout:        10000
+            enable:          true
+            required:        true
+          connectiontimeout: 5000
+          timeout:           10000
+          writetimeout:      10000
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 logging:
   level:
-    com.eduai.mailservice:     INFO
-    org.springframework:       WARN
-    org.hibernate:             WARN
+    com.eduai.mailservice: INFO
+    org.springframework:   WARN
+    org.hibernate:         WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId}] %logger{36} - %msg%n"
-  file:
-    name: /var/log/eduai-mail-service/app.log
 
-# ── Mail providers (prod — enable desired providers via env vars) ─────────────
+# ── Mail providers ────────────────────────────────────────────────────────────
 mail:
   providers:
     smtp:
-      enabled:    ${SMTP_ENABLED:true}
-      from-email: ${SMTP_FROM_EMAIL}
+      enabled:    false
+      from-email: ${SMTP_FROM_EMAIL:disabled}
       from-name:  ${SMTP_FROM_NAME:EduAI}
 
     resend:
-      enabled:    ${RESEND_ENABLED:false}
-      api-key:    ${RESEND_API_KEY:}
-      from-email: ${RESEND_FROM_EMAIL:}
+      enabled:    true
+      api-key:    ${RESEND_API_KEY}
+      from-email: ${RESEND_FROM_EMAIL:onboarding@resend.dev}
       from-name:  ${RESEND_FROM_NAME:EduAI}
 
     sendgrid:
-      enabled:    ${SENDGRID_ENABLED:false}
+      enabled:    false
       api-key:    ${SENDGRID_API_KEY:}
       from-email: ${SENDGRID_FROM_EMAIL:}
       from-name:  ${SENDGRID_FROM_NAME:EduAI}

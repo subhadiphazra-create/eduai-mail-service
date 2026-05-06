@@ -65,7 +65,7 @@ public class EmailQueueProducer {
      */
     public void enqueueRetry(QueueMessage message) {
         try {
-            message.incrementAttempt();
+            // REMOVED: message.incrementAttempt() — already done in handleFailure
             redisTemplate.opsForList().rightPush(Constants.QUEUE_EMAIL_RETRY, message);
             log.info("Message [id={}] enqueued for retry (attempt {})",
                     message.getMessageId(), message.getAttemptCount());

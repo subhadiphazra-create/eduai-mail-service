@@ -75,10 +75,11 @@ public class EmailQueueConsumer {
 
             QueueMessage message = (QueueMessage) raw;
 
-            // Back-off: re-queue if not ready yet
+            // Back-off: re-queue if not ready yet, but CONTINUE to next message
             if (!message.isReadyToProcess()) {
                 redisTemplate.opsForList().rightPush(queueKey, message);
-                break;
+                processed++;  // ← count it and continue, don't break
+                continue;     // ← try next message instead of stopping
             }
 
             processMessage(message);
@@ -172,9 +173,11 @@ public class EmailQueueConsumer {
         if (message.canRetry()) {
             emailLog.setStatus(EmailStatus.FAILED);
             emailLogRepository.save(emailLog);
-            message.incrementAttempt();
+            message.incrementAttempt();  // ← increment once here only
             message.scheduleRetry(RETRY_BACKOFF_MS * message.getAttemptCount());
-            producer.enqueueRetry(message);
+            producer.enqueueRetry(message);  // ← enqueueRetry no longer increments
+            log.warn("Message [id={}] enqueued for retry (attempt {})",
+                    message.getMessageId(), message.getAttemptCount());
         } else {
             emailLog.markFailed(ex.getMessage());
             emailLogRepository.save(emailLog);
